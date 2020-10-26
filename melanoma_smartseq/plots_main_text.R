@@ -3,7 +3,8 @@ require(tidyverse)
 library(cowplot)
 
 # Final model fit
-fit = Rcongas::GBM_smartseq_normal_vs_tumor
+# fit = Rcongas::GBM_smartseq_normal_vs_tumor
+fit = subclones
 input_raw_counts_genes = Rcongas::get_input_raw_data(fit)
 
 # DE analysis -- DESeq2 NON funziona
@@ -35,21 +36,13 @@ segments_ids = Rcongas::get_input_segmentation(fit) %>% Rcongas:::idify() %>% pu
 
 counts_plot = Rcongas::plot_segment_density(
   fit,
-  segments_ids = c(
-    "chr2:272203:219146868",
-    "chr5:102886512:162944709",
-    "chr5:224633:180278393",
-    "chr10:3154461:133786586",
-    "chr7:44444122:158715219",
-    "chr7:881668:44121936",
-    "chr13:21086599:101294428"
-  )
+  segments_ids = segments_ids
 )
 
 # plot_segment_density(fit, "chr8:1:67500000")
 
 # z-score input RNA with clustering assignments
-rna_plot_raw = Rcongas::plot_counts_rna_segments(fit, z_score = TRUE, cutoff_p = 0.001)
+rna_plot_raw = Rcongas::plot_counts_rna_segments(fit, z_score = TRUE)
 
 # Comparison with clonealign
 congas_clusterings = Rcongas::get_clusters(fit) %>% select(cell, cluster) %>%
