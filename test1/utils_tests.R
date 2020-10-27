@@ -25,7 +25,7 @@ subset_sim <- function(simul, nsegs) {
   return(simul)
 }
 
-run_example_fixed <-  function(arg_list_1, arg_list_2, IC = "BIC", nsegs = NULL, posteriors = FALSE, steps = 300L){
+run_example_fixed <-  function(arg_list_1, arg_list_2, IC = "BIC", nsegs = NULL, posteriors = FALSE, steps = 500L){
 
   cnv_df <- do.call(generate_cluster_ploidy_df, arg_list_1)
   simul <-  do.call(run_simulation_generative, c(list(cnv_df = cnv_df), arg_list_2))
@@ -34,9 +34,10 @@ run_example_fixed <-  function(arg_list_1, arg_list_2, IC = "BIC", nsegs = NULL,
   if(!is.null(nsegs)){
     simul <- subset_sim(simul, nsegs)
   }
-  simul$cnv$ploidy_real <-  round(simul$data$cnv$ploidy_real)
+  simul$data$cnv$ploidy_real <-  round(simul$data$cnv$ploidy_real)
 
-  res <- best_cluster(simul, "MixtureGaussian", 1:4,param_list = list("theta_scale" = 32, "theta_rate" = 32, "cnv_var" = 0.65),steps = steps, lr = 0.1, mixture = mixture, method = IC, posteriors = posteriors)
+
+  res <- best_cluster(simul, "MixtureGaussian", 1:4,param_list = list("theta_scale" = 32, "theta_rate" = 32, "cnv_var" = 0.65),steps = steps, lr = 0.1, mixture = mixture, method = IC, posteriors = posteriors, MAP = T)
 
   #res <-  NULL
 
