@@ -20,7 +20,6 @@ subset_sim <- function(simul, nsegs) {
   equal_segs <- sample(equal_segs, size = nsegs)
   simul <- simul[,c(diff_segs, equal_segs)]
 
-  print(simul[,c(diff_segs, equal_segs)])
 
   return(simul)
 }

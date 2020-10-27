@@ -1,9 +1,18 @@
-source("tests/utils_tests.R")
-devtools::load_all(".")
+source("../test1/utils_tests.R")
+devtools::load_all("../../annealToolbox/")
+
+`[.CNVSimulation` <- function(x, i, j) {
+  x$data$cnv <- x$data$cnv[j,]
+  x$data$counts <- x$data$counts[i,j]
+  x$data$clust_ids <-  x$data$clust_ids[i,1, drop = FALSE]
+  x$data$cnv_mat <- x$data$cnv_mat[i,j]
+
+  return(x)
+}
 
 K <- c(1)
 PGENES <- c(0.2,0.4,0.6,0.8,1)
-REP <- 50
+REP <- 1
 
 props <- c(0.7,0.3)
 
@@ -27,7 +36,7 @@ for( j in seq_along(K)){
       print(paste0("Doing cluster ", 2, " %genes ", PGENES[i], " replicate ", k))
       print(props)
       try({
-      tmp <- run_example_fixed(list('K' = 2, 'spots' = 1, 'changes' = c(2)), list('K' = 2, 'props' = props, 'perc_genes' = PGENES[i]), IC = "BIC", nsegs = 3)
+      tmp <- run_example_fixed(list('K' = 2, 'spots' = 1, 'changes' = c(2)), list('K' = 2, 'props' = props, 'perc_genes' = PGENES[i]), IC = "BIC", nsegs = 2)
 
         print(tmp$inference$parameters$assignement)
         NMI <-  aricode::NMI(tmp$simulation$clust_ids$cluster_id, tmp$inference$parameters$assignement)
