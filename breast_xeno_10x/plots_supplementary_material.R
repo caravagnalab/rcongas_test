@@ -3,13 +3,13 @@ require(tidyverse)
 library(cowplot)
 
 # Final model fit
-fit = Rcongas::breast_xeno_10x
+fit = Rcongas::breast_xeno_10x_small_segments_total_CN_norm
 input_raw_counts_genes = Rcongas::get_input_raw_data(fit)
 
 # DE genes raw table
 Rcongas::plot_raw_data(
-  get_input_raw_data(fit),
-  genes = Rcongas::get_DE_table(fit, cut_pvalue = 0.05) %>% pull(gene),
+  get_input_raw_data(fit) %>%  t(),
+  genes = Rcongas::get_DE_table(fit, cut_pvalue = 0.001) %>% pull(gene),
   clusters = Rcongas::get_clusters(fit),
   prompt = F,
   fontsize_row = 6,

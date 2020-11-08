@@ -3,7 +3,7 @@ require(tidyverse)
 library(cowplot)
 
 # Final model fit
-fit = Rcongas::breast_xeno_10x
+fit = Rcongas::breast_xeno_10x_small_segments_total_CN_norm
 input_raw_counts_genes = Rcongas::get_input_raw_data(fit)
 
 # DE analysis -- DESeq2 NON funziona
@@ -28,17 +28,11 @@ CNA_wg_plot = Rcongas::plot_gw_cna_profiles(fit, whole_genome = TRUE, cutoff_p =
   labs(title = "Breast cancer xenograft (10x scRNAseq)")
 
 # Chromosome 15 special counts plot
-segments_ids = Rcongas::get_input_segmentation(fit) %>% Rcongas:::idify() %>% pull(segment_id)
+segments_ids = Rcongas::get_clones_ploidy(fit) %>% idify() %>% filter(highlight) %>% pull(segment_id) %>%  unique()
 
 counts_plot = Rcongas::plot_segment_density(
   fit,
-  segments_ids = c(
-    "chr8:1:67500000",
-    "chr8:100800001:146400000",
-    "chr9:1:141300000",
-    "chr15:1:102600000",
-    "chr18:7950001:55950000"
-  )
+  segments_ids = segments_ids
 )
 
 # plot_segment_density(fit, "chr8:1:67500000")
@@ -50,7 +44,9 @@ rna_plot_raw = Rcongas::plot_counts_rna_segments(fit, z_score = TRUE, cutoff_p =
 congas_clusterings = Rcongas::get_clusters(fit) %>% select(cell, cluster) %>%
   rename(congas = cluster) %>% as_tibble()
 
-load("~/Documents/GitHub/rcongas/data/intersection_congas_clonealign.rda")
+load("../annealToolbox/data/intersection_congas_clonealign.rda")
+
+intersection_congas_clonealign$cluster <- get_cluster_assignments(fit)
 
 intersection_congas_clonealign = intersection_congas_clonealign %>%
   rename(CONGAS = cluster, clonealign = clone)
@@ -59,7 +55,7 @@ intersection_congas_clonealign = intersection_congas_clonealign %>%
 #   rename(clonealign = cluster) %>% as_tibble()
 joint_clusters = intersection_congas_clonealign %>%
   group_by(CONGAS, clonealign) %>%
-  summarise(n = n())
+  summarise(n = n()) %>% mutate(CONGAS = paste(CONGAS))
 
 
 # require(infotheo)
@@ -75,6 +71,8 @@ joint_clusters = intersection_congas_clonealign %>%
 
 require(ggalluvial)
 
+require(pdfCluster)
+
 clonalign_comparison_plot = ggplot(joint_clusters,
                                    aes(y = n, axis1 = CONGAS, axis2 = clonealign)) +
   geom_alluvium(aes(fill = CONGAS), width = 1 / 12) +
@@ -87,7 +85,9 @@ clonalign_comparison_plot = ggplot(joint_clusters,
   scale_fill_brewer(type = "qual", palette = "Set1") +
   CNAqc:::my_ggplot_theme() +
   guides(fill = guide_legend("cluster")) +
-  labs(title = "Comparison with clonealign", y = 'Cell', caption = 'Adjusted Rand Index: 0.61.')
+  labs(title = "Comparison with clonealign", y = 'Cell',
+       caption = paste0('Adjusted Rand Index:', round(pdfCluster::adj.rand.index(intersection_congas_clonealign$CONGAS,
+                                                                           intersection_congas_clonealign$clonealign), digits = 2), "."))
 
 
 
