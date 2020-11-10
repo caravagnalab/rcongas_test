@@ -1,6 +1,52 @@
 # Main_text score
-main_text_score = "RI"
+main_text_score = "ARI"
 supp_mat_scores = c("ARI", "MI", "NMI", "match")
+
+##################
+## TEST  1
+##################
+
+load("test1.RData")
+
+ls()
+
+res = res %>%
+  tidyr::separate(param_1, into = c('p1', 'Distance'), sep ='=') %>%
+  tidyr::separate(param_2, into = c('p2', 'Clusters'), sep ='=')
+# %>%
+#   mutate(param = factor(param, levels = sort(res$param %>% unique)))
+
+# res %>%
+#   reshape2::melt(id = c("Distance", "Clusters")) %>%
+#   filter(variable %in% supp_mat_scores) %>%
+#   as_tibble() %>%
+#   rename(score = variable) %>%
+#   ggplot(aes(
+#     x = paste(Clusters),
+#     y =  as.numeric(value),
+#     fill = (score),
+#     group = interaction(score, Clusters),
+#   )) +
+#   geom_boxplot() +
+#   facet_wrap(~Distance, scales = 'free')
+
+res %>%
+  reshape2::melt(id = c("Distance", "Clusters")) %>%
+  filter(variable %in% supp_mat_scores) %>%
+  # sample_n(600) %>%
+  ggplot(aes(
+    x = paste(Distance),
+    y = paste(Clusters),
+    fill = as.numeric(value)
+  )) +
+  geom_tile() +
+  scale_fill_distiller("Score", palette = 'Blues', direction = 1) +
+  facet_wrap(~ variable, scales = 'free') +
+  CNAqc:::my_ggplot_theme() +
+  labs(title = 'Test 1') +
+  ggsave(filename = "SM_test1.png",
+         width = 15,
+         height = 10)
 
 ##################
 ## TEST  2
@@ -12,6 +58,23 @@ ls()
 
 res = res %>%
   mutate(param = factor(param, levels = sort(res$param %>% unique)))
+
+res %>%
+  reshape2::melt(id = "param") %>%
+  ggplot(aes(
+    x = as.factor(param),
+    value,
+    fill = variable,
+    group = paste0(param)
+  )) +
+  geom_jitter(size = .4, color = 'steelblue') +
+  geom_boxplot() +
+  facet_wrap(~ variable, scales = 'free_y') +
+  CNAqc:::my_ggplot_theme() +
+  labs(x = "Parameter", title = 'Test 2') +
+  ggsave(filename = "test_2_all.pdf",
+         width = 15,
+         height = 10)
 
 res %>%
   reshape2::melt(id = "param") %>%
