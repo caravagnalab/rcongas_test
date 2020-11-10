@@ -189,6 +189,7 @@ res %>%
   ggsave("SM_test3.png", width = 8, height = 6)
 
 require(cowplot)
+
 plot_grid(
   CNAqc:::eplot(),
   plot_grid(
@@ -200,5 +201,6 @@ plot_grid(
     labels = c('b', 'c')),
   nrow = 2,
   labels = c('a')
-)
+)+
+  ggsave("MT_Figura_tests.png", width = 8, height = 6)
 
