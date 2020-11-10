@@ -13,9 +13,8 @@ ls()
 res = res %>%
   tidyr::separate(param_1, into = c('p1', 'Distance'), sep ='=') %>%
   tidyr::separate(param_2, into = c('p2', 'Clusters'), sep ='=')
-# %>%
-#   mutate(param = factor(param, levels = sort(res$param %>% unique)))
 
+# res = res %>% rename(Distance = param_1, Clusters = param_2)
 # res %>%
 #   reshape2::melt(id = c("Distance", "Clusters")) %>%
 #   filter(variable %in% supp_mat_scores) %>%
@@ -35,8 +34,8 @@ res %>%
   filter(variable %in% supp_mat_scores) %>%
   # sample_n(600) %>%
   ggplot(aes(
-    x = paste(Distance),
-    y = paste(Clusters),
+    x = Distance,
+    y = Clusters,
     fill = as.numeric(value)
   )) +
   geom_tile() +
