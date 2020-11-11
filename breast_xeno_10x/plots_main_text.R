@@ -28,12 +28,17 @@ CNA_wg_plot = Rcongas::plot_gw_cna_profiles(fit, whole_genome = TRUE, cutoff_p =
   labs(title = "Breast cancer xenograft (10x scRNAseq)")
 
 # Chromosome 15 special counts plot
-segments_ids = Rcongas::get_clones_ploidy(fit) %>% idify() %>% filter(highlight) %>% pull(segment_id) %>%  unique()
+segments_ids = Rcongas::get_clones_ploidy(fit) %>%
+  Rcongas:::idify() %>%
+  filter(highlight) %>%
+  pull(segment_id) %>%
+  unique()
 
 counts_plot = Rcongas::plot_segment_density(
   fit,
   segments_ids = segments_ids
 )
+names(counts_plot) = segments_ids
 
 # plot_segment_density(fit, "chr8:1:67500000")
 
@@ -41,12 +46,17 @@ counts_plot = Rcongas::plot_segment_density(
 rna_plot_raw = Rcongas::plot_counts_rna_segments(fit, z_score = TRUE, cutoff_p = 0.001)
 
 # Comparison with clonealign
-congas_clusterings = Rcongas::get_clusters(fit) %>% select(cell, cluster) %>%
+congas_clusterings = Rcongas::get_clusters(fit) %>%
+  select(cell, cluster) %>%
   rename(congas = cluster) %>% as_tibble()
 
+# Salvatore
 load("../annealToolbox/data/intersection_congas_clonealign.rda")
 
-intersection_congas_clonealign$cluster <- get_cluster_assignments(fit)
+# Giulio
+intersection_congas_clonealign = Rcongas::intersection_congas_clonealign
+
+intersection_congas_clonealign$cluster <- Rcongas:::get_cluster_assignments(fit)
 
 intersection_congas_clonealign = intersection_congas_clonealign %>%
   rename(CONGAS = cluster, clonealign = clone)
@@ -114,8 +124,9 @@ mid_strip =  plot_grid(
 
 
 bottom_strip = plot_grid(
-  counts_plot$`chr15:1:102600000`,
-  counts_plot$`chr18:7950001:55950000`,
+  counts_plot$`chr15:67050001:102600000`,
+  counts_plot$`chr16:1:3750000`,
+  counts_plot$`chr18:32400001:55950000`,
   clonalign_comparison_plot,
   axis = 'b',
   nrow = 1,
