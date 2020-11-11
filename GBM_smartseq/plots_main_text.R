@@ -3,8 +3,14 @@ require(tidyverse)
 library(cowplot)
 
 # Final model fit
-# fit = Rcongas::GBM_smartseq_normal_vs_tumor
-fit = subclones
+fit_nt = Rcongas::GBM_smartseq_normal_vs_tumor
+
+fit_t_14 = Rcongas::GBM_smartseq_tumor_only_df_14_no14
+fit_t_5 = Rcongas::GBM_smartseq_tumor_only_df_5_no5
+
+fit_t = fit_t_5
+
+# fit = subclones
 input_raw_counts_genes = Rcongas::get_input_raw_data(fit)
 
 # DE analysis -- DESeq2 NON funziona
@@ -21,19 +27,43 @@ input_raw_counts_genes = Rcongas::get_input_raw_data(fit)
 
 
 # DE plot
-DE_full_plot = Rcongas::plot_DE_volcano(fit, annotate_top = 7, cut_pvalue = 0.05) +
-  labs(title = "Differential Expression")
+DE_full_plot_nt = Rcongas::plot_DE_volcano(fit_nt, annotate_top = 7, cut_pvalue = 0.05) +
+  labs(title = "Differential Expression (Tumour/ normal)")
+
+DE_full_plot_t = Rcongas::plot_DE_volcano(fit_t, annotate_top = 7, cut_pvalue = 0.05) +
+  labs(title = "Differential Expression (Tumour)")
 
 # Mixing
-mixing_plot = Rcongas::plot_mixing_proportions(fit)
+mixing_plot_nt = Rcongas::plot_mixing_proportions(fit_nt)
+mixing_plot_t = Rcongas::plot_mixing_proportions(fit_t)
+
 
 # Whole-genome plot
-CNA_wg_plot = Rcongas::plot_gw_cna_profiles(fit, whole_genome = TRUE, cutoff_p = 0.001) +
-  labs(title = "Glioblastoma (Smart-Seq scRNAseq)")
+CNA_wg_plot_nt = Rcongas::plot_gw_cna_profiles(fit_nt, whole_genome = TRUE) +
+  labs(title = "Glioblastoma (Smart-Seq scRNAseq), Normal/tumour")
+CNA_wg_plot_t = Rcongas::plot_gw_cna_profiles(fit_t, whole_genome = TRUE) +
+  labs(title = "Glioblastoma (Smart-Seq scRNAseq), tumour")
 
-# Chromosome 15 special counts plot
-segments_ids = Rcongas::get_input_segmentation(fit) %>% Rcongas:::idify() %>% pull(segment_id)
+plot_grid(
+  CNA_wg_plot_nt,
+  CNA_wg_plot_t,
+  ncol = 1
+)
 
+
+# Chromosome special counts plot
+segments_ids = Rcongas::get_clones_ploidy(fit_nt) %>%
+  Rcongas:::idify() %>%
+  filter(highlight) %>%
+  pull(segment_id)
+
+# segments_ids = Rcongas::get_clones_ploidy(fit) %>%
+#   Rcongas:::idify() %>%
+#   filter(highlight) %>%
+#   pull(segment_id) %>%
+#   unique()
+
+counts_plot = NULL
 counts_plot = Rcongas::plot_segment_density(
   fit,
   segments_ids = segments_ids
@@ -42,13 +72,7 @@ counts_plot = Rcongas::plot_segment_density(
 # plot_segment_density(fit, "chr8:1:67500000")
 
 # z-score input RNA with clustering assignments
-rna_plot_raw = Rcongas::plot_counts_rna_segments(fit, z_score = TRUE)
-
-# Comparison with clonealign
-congas_clusterings = Rcongas::get_clusters(fit) %>% select(cell, cluster) %>%
-  rename(congas = cluster) %>% as_tibble()
-
-load("~/Documents/GitHub/rcongas/data/intersection_congas_clonealign.rda")
+rna_plot_raw = Rcongas::plot_counts_rna_segments(fit, normalised = FALSE, z_score = TRUE)
 
 
 # Strips
@@ -74,14 +98,14 @@ mid_strip =  plot_grid(
 
 bottom_strip = CNAqc:::eplot()
 
-bottom_strip = plot_grid(
-  counts_plot$`chr15:1:102600000`,
-  counts_plot$`chr18:7950001:55950000`,
-  clonalign_comparison_plot,
-  axis = 'b',
-  nrow = 1,
-  labels = c("e", "f", "g")
-)
+# bottom_strip = plot_grid(
+#   counts_plot$`chr15:1:102600000`,
+#   counts_plot$`chr18:7950001:55950000`,
+#   clonalign_comparison_plot,
+#   axis = 'b',
+#   nrow = 1,
+#   labels = c("e", "f", "g")
+# )
 
 
 plot_grid(
@@ -95,16 +119,6 @@ plot_grid(
          width = 12,
          height = 10)
 
-plot_grid(
-  top_strip,
-  mid_strip,
-  bottom_strip,
-  rel_heights = c(.8, 1, .8),
-  ncol = 1
-) %>%
-  ggsave(filename = "breast_xeno_10x_Main_text.png",
-         width = 12,
-         height = 10)
 
 
 # plot_DE_gw(fit)
