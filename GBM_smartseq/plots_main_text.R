@@ -11,20 +11,8 @@ fit_t_5 = Rcongas::GBM_smartseq_tumor_only_df_5_no5
 fit_t = fit_t_5
 
 # fit = subclones
-input_raw_counts_genes = Rcongas::get_input_raw_data(fit)
-
-# DE analysis -- DESeq2 NON funziona
-# fit = Rcongas::calculate_DE(
-#   x = fit,
-#   input = input_raw_counts_genes,
-#   clone1 = 1,
-#   clone2 = 2,
-#   method = "wilcox"
-#   # method = "DESeq2"
-# )
-
-
-
+input_raw_counts_genes_nt = Rcongas::get_input_raw_data(fit_nt)
+input_raw_counts_genes_t = Rcongas::get_input_raw_data(fit_t)
 
 # DE plot
 DE_full_plot_nt = Rcongas::plot_DE_volcano(fit_nt, annotate_top = 7, cut_pvalue = 0.05) +
@@ -37,12 +25,14 @@ DE_full_plot_t = Rcongas::plot_DE_volcano(fit_t, annotate_top = 7, cut_pvalue = 
 mixing_plot_nt = Rcongas::plot_mixing_proportions(fit_nt)
 mixing_plot_t = Rcongas::plot_mixing_proportions(fit_t)
 
-
 # Whole-genome plot
-CNA_wg_plot_nt = Rcongas::plot_gw_cna_profiles(fit_nt, whole_genome = TRUE) +
+CNA_wg_plot_nt = Rcongas::plot_gw_cna_profiles(fit_nt, whole_genome = TRUE, alpha = 0.1) +
   labs(title = "Glioblastoma (Smart-Seq scRNAseq), Normal/tumour")
-CNA_wg_plot_t = Rcongas::plot_gw_cna_profiles(fit_t, whole_genome = TRUE) +
+CNA_wg_plot_t = Rcongas::plot_gw_cna_profiles(fit_t, whole_genome = TRUE, alpha = 0.1) +
   labs(title = "Glioblastoma (Smart-Seq scRNAseq), tumour")
+
+plot_highlights(fit_nt, alpha = 0.1)
+plot_highlights(fit_t, alpha = 0.1)
 
 plot_grid(
   CNA_wg_plot_nt,
@@ -52,7 +42,7 @@ plot_grid(
 
 
 # Chromosome special counts plot
-segments_ids = Rcongas::get_clones_ploidy(fit_nt) %>%
+segments_ids = Rcongas::get_clones_ploidy(fit_nt, alpha = 0.1) %>%
   Rcongas:::idify() %>%
   filter(highlight) %>%
   pull(segment_id)
@@ -65,14 +55,15 @@ segments_ids = Rcongas::get_clones_ploidy(fit_nt) %>%
 
 counts_plot = NULL
 counts_plot = Rcongas::plot_segment_density(
-  fit,
+  fit_nt,
   segments_ids = segments_ids
 )
 
 # plot_segment_density(fit, "chr8:1:67500000")
 
 # z-score input RNA with clustering assignments
-rna_plot_raw = Rcongas::plot_counts_rna_segments(fit, normalised = FALSE, z_score = TRUE)
+rna_plot_raw_nt = Rcongas::plot_counts_rna_segments(fit_nt, normalised = FALSE, z_score = TRUE, alpha = 0.1)
+rna_plot_raw_t = Rcongas::plot_counts_rna_segments(fit_t, normalised = FALSE, z_score = TRUE, alpha = 0.1)
 
 
 # Strips

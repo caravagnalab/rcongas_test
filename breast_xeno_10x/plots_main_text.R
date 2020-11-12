@@ -24,8 +24,10 @@ DE_full_plot = Rcongas::plot_DE_volcano(fit, annotate_top = 7) +
 mixing_plot = Rcongas::plot_mixing_proportions(fit)
 
 # Whole-genome plot
-CNA_wg_plot = Rcongas::plot_gw_cna_profiles(fit, whole_genome = TRUE, cutoff_p = 0.001) +
+CNA_wg_plot = Rcongas::plot_gw_cna_profiles(fit, whole_genome = TRUE, alpha = 0.05) +
   labs(title = "Breast cancer xenograft (10x scRNAseq)")
+
+# plot_highlights(fit, alpha = 0.05)
 
 # Chromosome 15 special counts plot
 segments_ids = Rcongas::get_clones_ploidy(fit) %>%
@@ -51,7 +53,7 @@ congas_clusterings = Rcongas::get_clusters(fit) %>%
   rename(congas = cluster) %>% as_tibble()
 
 # Salvatore
-load("../annealToolbox/data/intersection_congas_clonealign.rda")
+# load("../annealToolbox/data/intersection_congas_clonealign.rda")
 
 # Giulio
 intersection_congas_clonealign = Rcongas::intersection_congas_clonealign
