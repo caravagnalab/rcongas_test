@@ -1,6 +1,6 @@
 # Main_text score
 main_text_score = "ARI"
-supp_mat_scores = c("ARI", "MI", "NMI", "match")
+supp_mat_scores = c("ARI", "NMI")
 
 ##################
 ## TEST  1
@@ -32,11 +32,13 @@ res = res %>%
 res %>%
   reshape2::melt(id = c("Distance", "Clusters")) %>%
   filter(variable %in% supp_mat_scores) %>%
+  group_by(Distance, Clusters,variable) %>%
+  summarize(score = mean(as.numeric(value), na.rm = T)) %>%
   # sample_n(600) %>%
   ggplot(aes(
     x = Distance,
     y = Clusters,
-    fill = as.numeric(value)
+    fill = as.numeric(score)
   )) +
   geom_tile() +
   scale_fill_distiller("Score", palette = 'Blues', direction = 1) +
