@@ -3,7 +3,7 @@ require(tidyverse)
 library(cowplot)
 
 # Final model fit
-fit = Rcongas::breast_xeno_10x_small_segments_total_CN_norm
+fit = Rcongas::breast_xeno_10x_small_segments_no_norm
 input_raw_counts_genes = Rcongas::get_input_raw_data(fit)
 
 # DE analysis -- DESeq2 NON funziona
@@ -38,14 +38,19 @@ segments_ids = Rcongas::get_clones_ploidy(fit) %>%
 
 counts_plot = Rcongas::plot_segment_density(
   fit,
-  segments_ids = segments_ids
+  segments_ids = segments_ids,
+  sum_denominator = TRUE
 )
 names(counts_plot) = segments_ids
 
 # plot_segment_density(fit, "chr8:1:67500000")
 
 # z-score input RNA with clustering assignments
-rna_plot_raw = Rcongas::plot_counts_rna_segments(fit, z_score = TRUE, cutoff_p = 0.001)
+rna_plot_raw = Rcongas::plot_counts_rna_segments(fit,
+                                                 z_score = TRUE,
+                                                 sum_denominator = FALSE
+                                                 # chromosomes = c('chr8', 'chr15', 'chr18', 'chr1')
+                                                 )
 
 # Comparison with clonealign
 congas_clusterings = Rcongas::get_clusters(fit) %>%
@@ -133,6 +138,16 @@ bottom_strip = plot_grid(
   axis = 'b',
   nrow = 1,
   labels = c("e", "f", "g")
+)
+
+bottom_strip = plot_grid(
+  plotlist = append(
+    counts_plot,
+    list(clonalign_comparison_plot)
+  ),
+  axis = 'b',
+  nrow = 1,
+  labels = c("e", "f", "g", 'h', 'i')
 )
 
 
