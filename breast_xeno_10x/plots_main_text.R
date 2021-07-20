@@ -3,7 +3,7 @@ require(tidyverse)
 library(cowplot)
 
 # Final model fit
-fit = Rcongas::breast_xeno_10x_small_segments_no_norm
+fit = Rcongas::breast_xeno_10x_small_segments_total_CN_norm
 input_raw_counts_genes = Rcongas::get_input_raw_data(fit)
 
 # DE analysis -- DESeq2 NON funziona
@@ -24,13 +24,13 @@ DE_full_plot = Rcongas::plot_DE_volcano(fit, annotate_top = 7) +
 mixing_plot = Rcongas::plot_mixing_proportions(fit)
 
 # Whole-genome plot
-CNA_wg_plot = Rcongas::plot_gw_cna_profiles(fit, whole_genome = TRUE, alpha = 0.05) +
+CNA_wg_plot = Rcongas::plot_gw_cna_profiles(fit, whole_genome = TRUE, alpha = 0.01) +
   labs(title = "Breast cancer xenograft (10x scRNAseq)")
 
 # plot_highlights(fit, alpha = 0.05)
 
 # Chromosome 15 special counts plot
-segments_ids = Rcongas::get_clones_ploidy(fit) %>%
+segments_ids = Rcongas::get_clones_ploidy(fit, alpha = 0.01) %>%
   Rcongas:::idify() %>%
   filter(highlight) %>%
   pull(segment_id) %>%
@@ -48,8 +48,9 @@ names(counts_plot) = segments_ids
 # z-score input RNA with clustering assignments
 rna_plot_raw = Rcongas::plot_counts_rna_segments(fit,
                                                  z_score = TRUE,
-                                                 sum_denominator = FALSE
-                                                 # chromosomes = c('chr8', 'chr15', 'chr18', 'chr1')
+                                                 sum_denominator = FALSE,
+                                                 alpha = 0.01,
+                                                 chromosomes = c('chr1', 'chr15', 'chr16', 'chr18')
                                                  )
 
 # Comparison with clonealign

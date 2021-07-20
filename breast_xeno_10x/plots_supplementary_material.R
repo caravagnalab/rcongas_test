@@ -9,40 +9,46 @@ input_raw_counts_genes = Rcongas::get_input_raw_data(fit)
 # DE genes raw table
 Rcongas::plot_raw_data(
   get_input_raw_data(fit) %>%  t(),
-  genes = Rcongas::get_DE_table(fit, cut_pvalue = 0.001) %>% pull(gene),
+  genes = Rcongas::get_DE_table(fit, cut_pvalue = 0.01) %>% pull(gene),
   clusters = Rcongas::get_clusters(fit),
   prompt = F,
   fontsize_row = 6,
   filename = "SM_breast_xeno_10x_rawdata.png",
   width = 11,
-  height = 7.5
+  height = 7.5,
+  description = "Breast xenograft raw data"
 )
+
+# Rcongas::get_DE_table(fit, cut_pvalue = 0.01) %>% pull(chr) %>% unique %>% sort
+
+
+
 
 gw_DE_plot = plot_DE_gw(fit)
 
 counts_plot = Rcongas::plot_segment_density(
   fit,
-  segments_ids = Rcongas::get_input_segmentation(fit) %>% Rcongas:::idify() %>% pull(segment_id)
+  segments_ids = Rcongas::get_input_segmentation(fit) %>% filter(fixed_mu > 250) %>% Rcongas:::idify() %>% pull(segment_id)
 )
 
 all_counts_plot = ggarrange(
   plotlist = counts_plot,
   common.legend = TRUE,
   legend = 'bottom',
-  nrow = 5,
-  ncol = 6
+  nrow = 3,
+  ncol = 3
 )
 
 ggarrange(
   gw_DE_plot,
   all_counts_plot,
   nrow = 2,
-  heights = c(1.5, 4),
+  heights = c(3, 4),
   labels = c('a', 'b')
 ) %>%
   ggsave(filename = "SM_breast_xeno_10x_counts.png",
-         width = 13,
-         height = 16)
+         width = 11,
+         height = 13)
 
 
 # plot_latent_variables(fit)
@@ -50,7 +56,7 @@ ggarrange(
 Rcongas:::plot_inference_report(fit) %>%
   ggsave(filename = "SM_breast_xeno_10x_inference_report.png",
          width = 10,
-         height = 12)
+         height = 3)
 
 # Comparison clonealign
 congas_clusterings = Rcongas::get_clusters(fit) %>% select(cell, cluster) %>%
@@ -80,9 +86,9 @@ plot_comparison_noi_clonealign = function(fit, intersection_congas_clonealign, c
     Rcongas:::idify()
 
   plot_grid(
-    ggplot(M, aes(n, fill = cluster_clonealign)) + geom_histogram(bins = 100) + CNAqc:::my_ggplot_theme() + scale_fill_brewer(palette = "Set2") + facet_wrap( ~
+    ggplot(M, aes(n, fill = cluster_clonealign)) + geom_histogram(bins = 100) + CNAqc:::my_ggplot_theme() + scale_fill_brewer("clonealign",palette = "Set2") + facet_wrap( ~
                                                                                                                                                                 segment_id) + labs(title = paste0("Chromosome ", chr)),
-    ggplot(M, aes(n, fill = cluster)) + geom_histogram(bins = 100) + CNAqc:::my_ggplot_theme() + scale_fill_brewer(palette = "Set1") + facet_wrap( ~
+    ggplot(M, aes(n, fill = cluster)) + geom_histogram(bins = 100) + CNAqc:::my_ggplot_theme() + scale_fill_brewer("CONGAS", palette = "Set1") + facet_wrap( ~
                                                                                                                                                      segment_id),
     ncol = 1
   )
@@ -93,8 +99,8 @@ ggarrange(
   plot_comparison_noi_clonealign(fit, intersection_congas_clonealign, 'chr1'),
   plot_comparison_noi_clonealign(fit, intersection_congas_clonealign, 'chr6'),
   plot_comparison_noi_clonealign(fit, intersection_congas_clonealign, 'chr8'),
-  plot_comparison_noi_clonealign(fit, intersection_congas_clonealign, 'chr9'),
   plot_comparison_noi_clonealign(fit, intersection_congas_clonealign, 'chr15'),
+  plot_comparison_noi_clonealign(fit, intersection_congas_clonealign, 'chr16'),
   plot_comparison_noi_clonealign(fit, intersection_congas_clonealign, 'chr18'),
   labels = c('a', 'b', 'c', 'd', 'e', 'f')
 ) %>%
